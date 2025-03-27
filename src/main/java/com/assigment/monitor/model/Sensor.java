@@ -1,7 +1,6 @@
 package com.assigment.monitor.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -20,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class Sensor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @NotBlank(message = "Name is required")
     @Size(min = 3, max = 30, message = "Name must be between 3 and 30 characters")
@@ -30,9 +29,14 @@ public class Sensor {
     @Size(max = 15, message = "Model must not exceed 15 characters")
     private String model;
 
-    @Valid
-    @NotNull(message = "Range is required")
-    private Range range;
+//    @Valid
+//    @NotNull(message = "Range is required")
+//    @Embedded
+//    @AttributeOverrides({
+//            @AttributeOverride(name = "rangeFrom", column = @Column(name = "range_from")),
+//            @AttributeOverride(name = "rangeTo", column = @Column(name = "range_to"))
+//    })
+//    private Range range;
 
     @Enumerated(EnumType.STRING)
     @NotNull(message = "SensorType is required")
