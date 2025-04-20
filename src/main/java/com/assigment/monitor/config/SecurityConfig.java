@@ -6,11 +6,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 /**
  * @author Shmarlouski
@@ -24,20 +23,44 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/sensors").hasAnyRole("ADMINISTRATOR", "VIEWER")
-                        .requestMatchers(HttpMethod.GET, "/sensors/**").hasAnyRole("ADMINISTRATOR")
-                        .requestMatchers(HttpMethod.POST, "/sensors").hasRole("ADMINISTRATOR")
-                        .requestMatchers(HttpMethod.PUT, "/sensors/**").hasRole("ADMINISTRATOR")
-                        .requestMatchers(HttpMethod.DELETE, "/sensors/**").hasRole("ADMINISTRATOR")
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").hasRole("ADMINISTRATOR")
+                        .requestMatchers("/", "/login", "/error", "/styles.css", "/favicon.ico").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+
+                        // Используем hasAuthority()
+                        .requestMatchers(HttpMethod.GET, "/sensors").hasAnyAuthority("ADMINISTRATOR", "VIEWER")
+                        .requestMatchers(HttpMethod.GET, "/sensors/**").hasAuthority("ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.POST, "/sensors").hasAuthority("ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.PUT, "/sensors/**").hasAuthority("ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/sensors/**").hasAuthority("ADMINISTRATOR")
+
+                        // Используем hasAuthority()
+                        .requestMatchers(HttpMethod.GET, "/view/sensors").hasAnyAuthority("ADMINISTRATOR", "VIEWER")
+                        .requestMatchers(HttpMethod.GET, "/view/sensors/**").hasAuthority("ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.POST, "/view/sensors").hasAuthority("ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.PUT, "/view/sensors/**").hasAuthority("ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/view/sensors/**").hasAuthority("ADMINISTRATOR")
+
+                        .anyRequest().authenticated()
                 )
-                .httpBasic(withDefaults());
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/view/sensors", true)
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
+                        .permitAll()
+                );
 
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
 }

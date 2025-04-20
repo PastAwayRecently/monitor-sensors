@@ -1,3 +1,44 @@
+#FOR PROD
+
+#services:
+#  db:
+#    image: postgres:latest
+#    container_name: postgres_db
+#    environment:
+#      POSTGRES_USER: admin
+#      POSTGRES_PASSWORD: admin
+#      POSTGRES_DB: sensor_db
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#    healthcheck:
+#      test: [ "CMD-SHELL", "pg_isready -U admin -d sensor_db" ]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 5
+#
+#  app:
+#    build: .
+#    container_name: spring_app
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sensor_db
+#      SPRING_DATASOURCE_USERNAME: admin
+#      SPRING_DATASOURCE_PASSWORD: admin
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#
+#volumes:
+#  postgres_data:
+
+
+#FOR DEBUGGING
+
+version: '3.8'
+
 services:
   db:
     image: postgres:latest
@@ -7,7 +48,7 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: sensor_db
     ports:
-      - "5432:5432"
+      - "5432:5432"  # Пробрасываем порт для локального подключения
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -16,18 +57,7 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
-    build: .
-    container_name: spring_app
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sensor_db
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: admin
-    depends_on:
-      db:
-        condition: service_healthy
-
 volumes:
   postgres_data:
+  
+  

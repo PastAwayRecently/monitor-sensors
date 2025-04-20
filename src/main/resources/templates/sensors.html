@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sensors</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Sensors</h1>
+
+    <!-- Для ADMINISTRATOR -->
+    <div sec:authorize="hasAuthority('ADMINISTRATOR')">
+        <a th:href="@{/view/sensors/add}" class="btn">Add Sensor</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Model</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Type</th>
+            <th>Location</th>
+            <th>Description</th>
+            <th sec:authorize="hasAuthority('ADMINISTRATOR')">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sensor : ${sensors}">
+            <td th:text="${sensor.id}"></td>
+            <td th:text="${sensor.name}"></td>
+            <td th:text="${sensor.model}"></td>
+            <td th:text="${sensor.rangeFrom}"></td>
+            <td th:text="${sensor.rangeTo}"></td>
+            <td th:text="${sensor.type}"></td>
+            <td th:text="${sensor.location}"></td>
+            <td th:text="${sensor.description}"></td>
+            <td sec:authorize="hasAuthority('ADMINISTRATOR')">
+                <a th:href="@{/view/sensors/edit/{id}(id=${sensor.id})}" class="btn">Edit</a>
+                <a th:href="@{/view/sensors/delete/{id}(id=${sensor.id})}" class="btn btn-danger">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Отладочная информация -->
+    <div sec:authorize="isAuthenticated()">
+        <p>Current user: <span sec:authentication="principal.username"></span></p>
+        <p>Role: <span sec:authentication="principal.authorities"></span></p>
+    </div>
+</div>
+</body>
+</html>

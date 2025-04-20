@@ -1,10 +1,13 @@
 package com.assigment.monitor.controller;
 
+import com.assigment.monitor.dto.SensorRequestDTO;
+import com.assigment.monitor.dto.SensorResponseDTO;
 import com.assigment.monitor.model.Sensor;
 import com.assigment.monitor.service.SensorService;
+import com.assigment.monitor.utils.SensorUtils;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,87 +30,66 @@ public class SensorController {
         this.sensorService = sensorService;
     }
 
-    @Operation(
-            summary = "Add new sensor",
-            description = "Creates new sensor and saves it in database",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Sensor created"),
-                    @ApiResponse(responseCode = "400", description = "Invalid data")
-            }
-    )
+    @Operation(summary = "Add new sensor", description = "Creates new sensor and saves it in database")
     @PostMapping
-    public Sensor addSensor(@RequestBody Sensor sensor) {
-        return sensorService.saveSensor(sensor);
+    public ResponseEntity<SensorResponseDTO> addSensor(@Valid @RequestBody SensorRequestDTO sensorRequestDTO) {
+        Sensor sensor = new Sensor();
+        SensorUtils.populate(sensor, sensorRequestDTO);
+
+        Sensor savedSensor = sensorService.saveSensor(sensor);
+        return ResponseEntity.ok(SensorResponseDTO.fromEntity(savedSensor));
     }
 
-    @Operation(
-            summary = "Get all sensors",
-            description = "Returns list of all sensors",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "List returns")
-            }
-    )
+    @Operation(summary = "Get all sensors", description = "Returns list of all sensors")
     @GetMapping
-    public List<Sensor> getAllSensors() {
-        return sensorService.getAllSensors();
+    public ResponseEntity<List<SensorResponseDTO>> getAllSensors() {
+        List<Sensor> sensors = sensorService.getAllSensors();
+        List<SensorResponseDTO> responseDTOs = sensors.stream()
+                .map(SensorResponseDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(responseDTOs);
     }
 
-    @Operation(
-            summary = "Get sensor by ID",
-            description = "Returns sensor by ID",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Sensor is found"),
-                    @ApiResponse(responseCode = "404", description = "Sensor is not found")
-            }
-    )
+    @Operation(summary = "Get sensor by ID", description = "Returns sensor by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Sensor> getSensorById(@PathVariable Long id) {
+    public ResponseEntity<SensorResponseDTO> getSensorById(@PathVariable Long id) {
         Optional<Sensor> sensor = sensorService.getSensorById(id);
-        return sensor.map(ResponseEntity::ok)
+        return sensor.map(s -> ResponseEntity.ok(SensorResponseDTO.fromEntity(s)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @Operation(
-            summary = "Delete sensor by ID",
-            description = "Deletes sensor by ID",
-            responses = {
-                    @ApiResponse(responseCode = "204", description = "Sensor was deleted"),
-                    @ApiResponse(responseCode = "404", description = "Sensor was not deleted")
-            }
-    )
+    @Operation(summary = "Delete sensor by ID", description = "Deletes sensor by ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSensor(@PathVariable Long id) {
         sensorService.deleteSensor(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(
-            summary = "Update sensor by ID",
-            description = "Updates sensor by ID",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Sensor is updated"),
-                    @ApiResponse(responseCode = "400", description = "Invalid data"),
-                    @ApiResponse(responseCode = "404", description = "Sensor is not found")
-            }
-    )
+    @Operation(summary = "Update sensor by ID", description = "Updates sensor by ID")
     @PutMapping("/{id}")
-    public ResponseEntity<Sensor> updateSensor(@PathVariable Long id, @RequestBody Sensor updatedSensor) {
-        Optional<Sensor> sensor = sensorService.updateSensor(id, updatedSensor);
-        return sensor.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<SensorResponseDTO> updateSensor(
+            @PathVariable Long id,
+            @Valid @RequestBody SensorRequestDTO sensorRequestDTO
+    ) {
+        Optional<Sensor> sensorOpt = sensorService.getSensorById(id);
+        if (sensorOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Sensor sensor = sensorOpt.get();
+        SensorUtils.populate(sensor, sensorRequestDTO);
+
+        Sensor updatedSensor = sensorService.saveSensor(sensor);
+        return ResponseEntity.ok(SensorResponseDTO.fromEntity(updatedSensor));
     }
 
-    @Operation(
-            summary = "Search sensor by name or model",
-            description = "Searches sensor by name or model",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Sensor is found"),
-                    @ApiResponse(responseCode = "404", description = "Sensor is not found")
-            }
-    )
+    @Operation(summary = "Search sensor by name or model", description = "Searches sensor by name or model")
     @GetMapping("/search")
-    public List<Sensor> searchSensors(@RequestParam String query) {
-        return sensorService.searchByNameOrModel(query);
+    public ResponseEntity<List<SensorResponseDTO>> searchSensors(@RequestParam String query) {
+        List<Sensor> sensors = sensorService.searchByNameOrModel(query);
+        List<SensorResponseDTO> responseDTOs = sensors.stream()
+                .map(SensorResponseDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(responseDTOs);
     }
-
 }

@@ -42,7 +42,8 @@ public class SensorService {
                 .map(existingSensor -> {
                     existingSensor.setName(updatedSensor.getName());
                     existingSensor.setModel(updatedSensor.getModel());
-//                    existingSensor.setRange(updatedSensor.getRange());
+                    existingSensor.setRangeFrom(updatedSensor.getRangeFrom());
+                    existingSensor.setRangeTo(updatedSensor.getRangeTo());
                     existingSensor.setType(updatedSensor.getType());
                     existingSensor.setUnit(updatedSensor.getUnit());
                     existingSensor.setLocation(updatedSensor.getLocation());

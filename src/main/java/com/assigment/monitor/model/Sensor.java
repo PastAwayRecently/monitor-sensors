@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -29,14 +30,9 @@ public class Sensor {
     @Size(max = 15, message = "Model must not exceed 15 characters")
     private String model;
 
-//    @Valid
-//    @NotNull(message = "Range is required")
-//    @Embedded
-//    @AttributeOverrides({
-//            @AttributeOverride(name = "rangeFrom", column = @Column(name = "range_from")),
-//            @AttributeOverride(name = "rangeTo", column = @Column(name = "range_to"))
-//    })
-//    private Range range;
+    private Integer rangeFrom;
+
+    private Integer rangeTo;
 
     @Enumerated(EnumType.STRING)
     @NotNull(message = "SensorType is required")

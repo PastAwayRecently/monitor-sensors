@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${sensorRequest?.id == null} ? 'Add Sensor' : 'Edit Sensor'"></title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="container">
+    <h1 th:text="${sensorRequest?.id == null} ? 'Add Sensor' : 'Edit Sensor'"></h1>
+
+    <form th:object="${sensorRequest}" method="post"
+          th:action="${sensorRequest?.id == null} ? @{/view/sensors/save} : @{/view/sensors/save}">
+
+        <!-- Блок общих ошибок -->
+        <div th:if="${#fields.hasErrors('*')}" class="error">
+            <div th:each="err : ${#fields.errors('*')}" th:text="${err}"></div>
+        </div>
+
+        <!-- Скрытое поле для ID -->
+        <input type="hidden" th:field="*{id}">
+
+        <!-- Поле Name -->
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" th:field="*{name}" required>
+            <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error"></span>
+        </div>
+
+        <!-- Поле Model -->
+        <div class="form-group">
+            <label for="model">Model:</label>
+            <input type="text" id="model" th:field="*{model}" required>
+            <span th:if="${#fields.hasErrors('model')}" th:errors="*{model}" class="error"></span>
+        </div>
+
+        <!-- Поле Range From -->
+        <div class="form-group">
+            <label for="rangeFrom">Range From:</label>
+            <input type="number" id="rangeFrom" th:field="*{rangeFrom}" required
+                   min="0" step="1" class="form-input">
+            <span th:if="${#fields.hasErrors('rangeFrom')}" th:errors="*{rangeFrom}" class="error"></span>
+        </div>
+        <!-- Поле Range To -->
+        <div class="form-group">
+            <label for="rangeTo">Range To:</label>
+            <input type="number" id="rangeTo" th:field="*{rangeTo}"
+                   min="0" step="1" class="form-input">
+            <span th:if="${#fields.hasErrors('rangeTo')}" th:errors="*{rangeTo}" class="error"></span>
+        </div>
+
+        <!-- Блок для ошибки валидации "rangeTo >= rangeFrom" -->
+        <div th:if="${#fields.hasErrors('rangeTo') && #strings.contains(#fields.errors('rangeTo'), 'must be greater')}"
+             class="error">
+            Range To must be greater than or equal to Range From
+        </div>
+
+        <!-- Поле Type (выпадающий список) -->
+        <div class="form-group">
+            <label for="type">Type:</label>
+            <select id="type" th:field="*{type}" required>
+                <option value="">Select Type</option>
+                <option th:each="type : ${T(com.assigment.monitor.model.SensorType).values()}"
+                        th:value="${type}"
+                        th:text="${type}"
+                        th:selected="${sensorRequest.type == type}"></option>
+            </select>
+            <span th:if="${#fields.hasErrors('type')}" th:errors="*{type}" class="error"></span>
+        </div>
+
+        <!-- Поле Unit (выпадающий список) -->
+        <div class="form-group">
+            <label for="unit">Unit:</label>
+            <select id="unit" th:field="*{unit}">
+                <option value="">Select Unit</option>
+                <option th:each="unit : ${T(com.assigment.monitor.model.SensorUnit).values()}"
+                        th:value="${unit}"
+                        th:text="${unit}"
+                        th:selected="${sensorRequest.unit == unit}"></option>
+            </select>
+            <span th:if="${#fields.hasErrors('unit')}" th:errors="*{unit}" class="error"></span>
+        </div>
+
+        <!-- Поле Location -->
+        <div class="form-group">
+            <label for="location">Location:</label>
+            <input type="text" id="location" th:field="*{location}" required>
+            <span th:if="${#fields.hasErrors('location')}" th:errors="*{location}" class="error"></span>
+        </div>
+
+        <!-- Поле Description (textarea) -->
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" th:field="*{description}" class="form-input"></textarea>
+            <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="error"></span>
+        </div>
+
+        <!-- Кнопки Submit и Cancel -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-save">Save</button>
+            <a th:href="@{/view/sensors}" class="btn btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>
